@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: GATEWAY-SERVICE
+  cloud:
+    gateway:
+      routes:
+      
+      #First service
+      - id: order-service
+        uri:
+          lb:// ORDER-SERVICE
+        predicates:
+        - Path=/order/**
+        filters:
+        - name: CircuitBreaker
+          args:
+            name: order-service
+            fallbackuri: forward:/orderFallBack
+        
+      #Second service
+      - id: order-service
+        uri:
+          lb://CART-SERVICE
+        predicates:
+        - Path=/cart/**
+        filters:
+        - name: CircuitBreaker
+          args:
+            name: cart-service
+            fallbackuri: forward:/paymentFallback
+
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+    
+    
+server:
+  port: 8989
+  
+ 
